@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Craft</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap');
+
+        :root {
+
+            --bg-color: #1e1e1e;
+            --text-color: #cfcfcf;
+            --card-color: #497c43;
+            --card-flipped-color: #6faf5f;
+            --card-flipped-text-color: #111;
+            --matched-glow: 0 0 15px #3aff3a;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #2b2d2f;
+            --text-color: #d4d4d4;
+            --card-color: #3c6e47;
+            --card-flipped-color: #5cdb95;
+            --card-flipped-text-color: #000;
+            --matched-glow: 0 0 15px #43eb1d;
+        }
+
+        body {
+            background-image: url('images/minecraft_bg.jpg');
+            background-size: cover;
+            overflow: hidden;
+            font-family: 'Pixelify Sans', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        h1 {
+            color: #43eb1d;
+            font-size: 3rem;
+        }
+
+        .score-board {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle {
+            margin-bottom: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            background-color: var(--card-color);
+            color: var(--card-flipped-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: var(--card-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card.flipped {
+            background-color: var(--card-flipped-color);
+            color: var(--card-flipped-text-color);
+            cursor: default;
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            box-shadow: var(--matched-glow);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: var(--matched-glow);
+            }
+            50% {
+                box-shadow: 0 0 20px #ffffff;
+            }
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 1rem;
+        }
+
+        .timer {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .audio-controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .audio-controls button {
+            background-color: var(--card-color);
+            color: var(--card-flipped-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <h1>Memory Craft</h1>
+    <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
+    <div class="score-board">
+        Score: <span id="score">0</span> | High Score: <span id="high-score">0</span>
+    </div>
+    <div class="timer">Quick Time: <span id="quick-time">0</span>s | Best Time: <span id="best-time">--</span>s</div>
+    <div class="game-board" id="game-board"></div>
+    <div class="audio-controls">
+        <button id="play-music">Play Music</button>
+        <button id="pause-music">Pause Music</button>
+    </div>
+    <div class="footer">Made with ❤️</div>
+
+    <audio id="bg-music" loop>
+        <source src="minecraftSound.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        const minecraftItems = [
+            'images/pickaxe.png',
+            'images/sword.png',
+            'images/diamond.png',
+            'images/gold_ingot.png',
+            'images/iron_ingot.png',
+            'images/redstone.png',
+            'images/emerald.png',
+            'images/craftingTable.png'
+        ];
+
+        const gameBoard = document.getElementById('game-board');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('high-score');
+        const themeToggle = document.getElementById('theme-toggle');
+        const quickTimeElement = document.getElementById('quick-time');
+        const bestTimeElement = document.getElementById('best-time');
+        const bgMusic = document.getElementById('bg-music');
+        const playMusicButton = document.getElementById('play-music');
+        const pauseMusicButton = document.getElementById('pause-music');
+
+        let highScore = localStorage.getItem('highScore') || 0;
+        let bestTime = localStorage.getItem('bestTime') || null;
+
+        highScoreElement.textContent = highScore;
+        bestTimeElement.textContent = bestTime ? `${bestTime}` : '--';
+
+        const itemPairs = [...minecraftItems, ...minecraftItems];
+        itemPairs.sort(() => Math.random() - 0.5);
+
+        let flippedCards = [];
+        let matchedCount = 0;
+        let score = 0;
+        let startTime = Date.now();
+
+        setInterval(() => {
+            if (matchedCount < itemPairs.length) {
+                const currentTime = Math.floor((Date.now() - startTime) / 1000);
+                quickTimeElement.textContent = currentTime;
+            }
+        }, 1000);
+
+        itemPairs.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.item = item;
+            card.dataset.index = index;
+
+            card.textContent = '?';
+            card.style.backgroundImage = '';
+
+            card.addEventListener('click', () => handleCardClick(card));
+
+            gameBoard.appendChild(card);
+        });
+
+        function handleCardClick(card) {
+            if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+
+            card.style.backgroundImage = `url(${card.dataset.item})`;
+            card.style.backgroundSize = 'cover';
+            card.textContent = '';
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.item === card2.dataset.item) {
+                matchedCount += 2;
+                score += 10;
+                scoreElement.textContent = score;
+
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+
+                if (score > highScore) {
+                    highScore = score;
+                    highScoreElement.textContent = highScore;
+                    localStorage.setItem('highScore', highScore);
+                }
+
+                flippedCards = [];
+
+                if (matchedCount === itemPairs.length) {
+                    const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+                    quickTimeElement.textContent = timeTaken;
+
+                    if (!bestTime || timeTaken < bestTime) {
+                        bestTime = timeTaken;
+                        bestTimeElement.textContent = timeTaken;
+                        localStorage.setItem('bestTime', bestTime);
+                    }
+
+                    setTimeout(() => alert(`You won! 🎉 Your time: ${timeTaken}s`), 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.style.backgroundImage = '';
+                    card1.textContent = '?';
+                    card1.classList.remove('flipped');
+
+                    card2.style.backgroundImage = '';
+                    card2.textContent = '?';
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 800);
+            }
+        }
+
+        function resetGame() {
+            flippedCards = [];
+            matchedCount = 0;
+            score = 0;
+            scoreElement.textContent = score;
+            startTime = Date.now();
+            quickTimeElement.textContent = '0';
+            gameBoard.innerHTML = '';
+            itemPairs.sort(() => Math.random() - 0.5);
+
+            itemPairs.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.item = item;
+                card.dataset.index = index;
+
+                card.textContent = '?';
+                card.style.backgroundImage = '';
+
+                card.addEventListener('click', () => handleCardClick(card));
+
+                gameBoard.appendChild(card);
+            });
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.body.dataset.theme;
+            if (currentTheme === 'dark') {
+                document.body.dataset.theme = '';
+                themeToggle.textContent = 'Toggle Theme';
+            } else {
+                document.body.dataset.theme = 'dark';
+                themeToggle.textContent = 'Toggle  Theme';
+            }
+        });
+
+        playMusicButton.addEventListener('click', () => {
+            bgMusic.play();
+        });
+
+        pauseMusicButton.addEventListener('click', () => {
+            bgMusic.pause();
+        });
+    </script>
+
+</body>
+</html>
