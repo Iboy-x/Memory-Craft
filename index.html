@@ -28,9 +28,9 @@
         body {
             background-image: url('images/minecraft_bg.jpg');
             background-size: cover;
-            background-attachment: fixed;  /* Keep background fixed while scrolling */
-            overflow-x: hidden;           /* Only hide horizontal scrolling */
-            overflow-y: auto;             /* Allow vertical scrolling */
+            background-attachment: fixed;  
+            overflow-x: hidden;           
+            overflow-y: auto;          
             font-family: 'Pixelify Sans', sans-serif;
             display: flex;
             flex-direction: column;
@@ -43,6 +43,10 @@
             color: var(--text-color);
         }
 
+        a {
+            color: #43eb1d;
+            text-decoration: none;
+        }
         h1 {
             color: #43eb1d;
             font-size: 3rem;
@@ -146,7 +150,6 @@
             display: flex;
             gap: 10px;
         }
-
         .audio-controls button {
             background-color: var(--card-color);
             color: var(--card-flipped-color);
@@ -157,7 +160,6 @@
             font-size: 1rem;
         }
 
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -209,15 +211,21 @@
         <div>Quick Time: <span id="quick-time">0</span>s</div>
     </div>
     <div class="score-board">
-        <div>High Score: <span id="high-score">0</span></div>
-        <div>Best Time: <span id="best-time">--</span>s</div>
+        <div id="high-score-container">
+            <span id="high-score-label">High Score Easy: </span>
+            <span id="high-score">0</span>
+        </div>
+        <div id="best-time-container">
+            <span id="best-time-label">Best Time Easy: </span>
+            <span id="best-time">--</span>s
+        </div>
     </div>
     <div class="game-board" id="game-board"></div>
     <div class="audio-controls">
         <button id="play-music">Play Music</button>
         <button id="pause-music">Pause Music</button>
     </div>
-    <div class="footer">Made with ❤️ by iboy-x</div>
+    <div class="footer">Made with ❤️ by <a href="https://github.com/iboy-x" target="_blank">iboy-x</a></div>
 
     <!-- Modal -->
     <div class="modal-overlay" id="modal-overlay"></div>
@@ -262,8 +270,10 @@
         const gameBoard = document.getElementById('game-board');
         const scoreElement = document.getElementById('score');
         const highScoreElement = document.getElementById('high-score');
+        const highScoreLabel = document.getElementById('high-score-label');
         const themeToggle = document.getElementById('theme-toggle');
         const quickTimeElement = document.getElementById('quick-time');
+        const bestTimeLabel = document.getElementById('best-time-label');
         const bestTimeElement = document.getElementById('best-time');
         const moveCounterElement = document.getElementById('move-counter');
         const bgMusic = document.getElementById('bg-music');
@@ -274,23 +284,74 @@
         const modalOverlay = document.getElementById('modal-overlay');
         const restartButton = document.getElementById('restart-game');
 
-        let highScore = localStorage.getItem('highScore') || 0;
-        let bestTime = localStorage.getItem('bestTime') || null;
+        let highScoreEasy = localStorage.getItem('highScoreEasy') || 0;
+        let highScoreMedium = localStorage.getItem('highScoreMedium') || 0;
+        let highScoreHard = localStorage.getItem('highScoreHard') || 0;
+        let bestTimeEasy = localStorage.getItem('bestTimeEasy') || null;
+        let bestTimeMedium = localStorage.getItem('bestTimeMedium') || null;
+        let bestTimeHard = localStorage.getItem('bestTimeHard') || null;
 
-        highScoreElement.textContent = highScore;
-        bestTimeElement.textContent = bestTime ? `${bestTime}` : '--';
+        function updateHighScoreDisplay() {
+            highScoreLabel.textContent = `High Score ${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)}: `;
+            let currentHighScore;
+            switch(currentDifficulty) {
+                case 'easy':
+                    currentHighScore = highScoreEasy;
+                    break;
+                case 'medium':
+                    currentHighScore = highScoreMedium;
+                    break;
+                case 'hard':
+                    currentHighScore = highScoreHard;
+                    break;
+            }
+            highScoreElement.textContent = currentHighScore;
+        }
+        
+        function updateBestTimeDisplay() {
+            bestTimeLabel.textContent = `Best Time ${currentDifficulty.charAt(0).toUpperCase() + currentDifficulty.slice(1)}: `;
+            let currentBestTime;
+            switch(currentDifficulty) {
+                case 'easy':
+                    currentBestTime = bestTimeEasy;
+                    break;
+                case 'medium':
+                    currentBestTime = bestTimeMedium;
+                    break;
+                case 'hard':
+                    currentBestTime = bestTimeHard;
+                    break;
+            }
+            bestTimeElement.textContent = currentBestTime ? currentBestTime : '--';
+        }
+
+        updateHighScoreDisplay();
+        updateBestTimeDisplay();
 
         let itemPairs = [];
         let flippedCards = [];
         let matchedCount = 0;
         let score = 0;
         let moves = 0;
-        let startTime = Date.now();
+        let startTime = null;
+        let timerInterval;
 
         function showGameOverModal(finalScore, totalTime) {
             document.getElementById('final-score').textContent = finalScore;
             document.getElementById('final-time').textContent = totalTime;
-            document.getElementById('modal-high-score').textContent = highScore;
+            let currentHighScore;
+            switch(currentDifficulty) {
+                case 'easy':
+                    currentHighScore = highScoreEasy;
+                    break;
+                case 'medium':
+                    currentHighScore = highScoreMedium;
+                    break;
+                case 'hard':
+                    currentHighScore = highScoreHard;
+                    break;
+            }
+            document.getElementById('modal-high-score').textContent = currentHighScore;
             modal.style.display = 'block';
             modalOverlay.style.display = 'block';
         }
@@ -317,19 +378,31 @@
                 button.classList.add('active');
                 currentDifficulty = button.dataset.difficulty;
                 flipTime = difficultySettings[currentDifficulty].flipTime;
+                updateHighScoreDisplay();
+                updateBestTimeDisplay();
                 resetGame();
             });
         });
 
-        setInterval(() => {
-            if (matchedCount < itemPairs.length) {
-                const currentTime = Math.floor((Date.now() - startTime) / 1000);
-                quickTimeElement.textContent = currentTime;
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
             }
-        }, 1000);
+            timerInterval = setInterval(() => {
+                if (startTime && matchedCount < itemPairs.length) {
+                    const currentTime = Math.floor((Date.now() - startTime) / 1000);
+                    quickTimeElement.textContent = currentTime;
+                }
+            }, 1000);
+        }
 
         function handleCardClick(card) {
             if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+
+            if (!startTime) {
+                startTime = Date.now();
+                startTimer();
+            }
 
             card.style.backgroundImage = `url(${card.dataset.item})`;
             card.style.backgroundSize = 'cover';
@@ -366,17 +439,42 @@
 
                 if (matchedCount === itemPairs.length) {
                     const totalTime = Math.floor((Date.now() - startTime) / 1000);
+                    clearInterval(timerInterval);
 
-                    if (!bestTime || totalTime < bestTime) {
-                        bestTime = totalTime;
-                        localStorage.setItem('bestTime', bestTime);
-                        bestTimeElement.textContent = bestTime;
-                    }
-
-                    if (score > highScore) {
-                        highScore = score;
-                        localStorage.setItem('highScore', highScore);
-                        highScoreElement.textContent = highScore;
+                    // Update best time and high score based on difficulty
+                    if (currentDifficulty === 'easy') {
+                        if (!bestTimeEasy || totalTime < bestTimeEasy) {
+                            bestTimeEasy = totalTime;
+                            localStorage.setItem('bestTimeEasy', bestTimeEasy);
+                            updateBestTimeDisplay();
+                        }
+                        if (score > highScoreEasy) {
+                            highScoreEasy = score;
+                            localStorage.setItem('highScoreEasy', highScoreEasy);
+                            updateHighScoreDisplay();
+                        }
+                    } else if (currentDifficulty === 'medium') {
+                        if (!bestTimeMedium || totalTime < bestTimeMedium) {
+                            bestTimeMedium = totalTime;
+                            localStorage.setItem('bestTimeMedium', bestTimeMedium);
+                            updateBestTimeDisplay();
+                        }
+                        if (score > highScoreMedium) {
+                            highScoreMedium = score;
+                            localStorage.setItem('highScoreMedium', highScoreMedium);
+                            updateHighScoreDisplay();
+                        }
+                    } else if (currentDifficulty === 'hard') {
+                        if (!bestTimeHard || totalTime < bestTimeHard) {
+                            bestTimeHard = totalTime;
+                            localStorage.setItem('bestTimeHard', bestTimeHard);
+                            updateBestTimeDisplay();
+                        }
+                        if (score > highScoreHard) {
+                            highScoreHard = score;
+                            localStorage.setItem('highScoreHard', highScoreHard);
+                            updateHighScoreDisplay();
+                        }
                     }
 
                     showGameOverModal(score, totalTime);
@@ -409,7 +507,10 @@
             flippedCards = [];
             matchedCount = 0;
             moves = 0;
-            startTime = Date.now();
+            startTime = null;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
             quickTimeElement.textContent = 0;
             moveCounterElement.textContent = 0;
             scoreElement.textContent = 0;
@@ -436,3 +537,4 @@
     </script>
 </body>
 </html>
+s
