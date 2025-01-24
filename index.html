@@ -25,6 +25,12 @@
             --matched-glow: 0 0 15px #43eb1d;
         }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background-image: url('images/minecraft_bg.jpg');
             background-size: cover;
@@ -38,7 +44,7 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;                /* Add some padding */
+            padding: 10px;
             background-color: var(--bg-color);
             color: var(--text-color);
         }
@@ -47,50 +53,58 @@
             color: #43eb1d;
             text-decoration: none;
         }
+
         h1 {
             color: #43eb1d;
-            font-size: 3rem;
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-align: center;
+            margin: 10px 0;
         }
 
         .score-board {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 30px;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
+            gap: 15px;
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            margin: 10px 0;
             background: rgba(0, 0, 0, 0.5);
             padding: 10px;
             border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
         }
 
         .theme-toggle {
-            margin-bottom: 20px;
-            font-size: 1rem;
+            margin: 10px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
             cursor: pointer;
             background-color: var(--card-color);
             color: var(--card-flipped-color);
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 5px;
-            position: absolute;
-            top: 20px;
-            right: 20px;
+            position: fixed;
+            top: 10px;
+            right: 10px;
         }
 
         .difficulty-controls {
-            margin: 20px 0;
+            margin: 15px 0;
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
         }
 
         .difficulty-btn {
             background-color: var(--card-color);
             color: var(--card-flipped-color);
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: clamp(0.8rem, 2vw, 1rem);
         }
 
         .difficulty-btn.active {
@@ -100,18 +114,21 @@
 
         .game-board {
             display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+            gap: 8px;
+            width: 95%;
+            max-width: 600px;
+            margin: 0 auto;
         }
 
         .card {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            aspect-ratio: 1;
             background-color: var(--card-color);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            font-size: clamp(1.5rem, 4vw, 2rem);
             color: white;
             border-radius: 8px;
             cursor: pointer;
@@ -141,23 +158,27 @@
         }
 
         .footer {
-            margin-top: 20px;
-            font-size: 1rem;
+            margin: 20px 0;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            text-align: center;
         }
 
         .audio-controls {
-            margin-top: 20px;
+            margin: 15px 0;
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
         }
+
         .audio-controls button {
             background-color: var(--card-color);
             color: var(--card-flipped-color);
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: clamp(0.8rem, 2vw, 1rem);
             transition: all 0.3s ease;
         }
 
@@ -184,6 +205,18 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
             z-index: 1000;
             text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal h2 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            margin: 10px 0;
         }
 
         .modal-overlay {
@@ -204,12 +237,35 @@
             padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
             margin-top: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .game-board {
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+                gap: 5px;
+            }
+
+            .score-board {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+
+            .theme-toggle {
+                padding: 6px 12px;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .game-board {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            }
         }
     </style>
 </head>
 <body data-theme="dark">
+    <!-- Rest of the HTML remains the same -->
     <h1>Memory Craft</h1>
     <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
     <div class="difficulty-controls">
@@ -255,9 +311,10 @@
     </audio>
 
     <script>
+        // Preload images
         const minecraftItems = [
             'images/pickaxe.png',
-            'images/sword.png',
+            'images/sword.png', 
             'images/diamond.png',
             'images/gold_ingot.png',
             'images/iron_ingot.png',
@@ -269,6 +326,23 @@
             'images/chest.png',
             'images/tnt.png'
         ];
+
+        // Preload all images before starting game
+        function preloadImages(callback) {
+            let loadedImages = 0;
+            const totalImages = minecraftItems.length;
+            
+            minecraftItems.forEach(src => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImages++;
+                    if(loadedImages === totalImages) {
+                        callback();
+                    }
+                };
+                img.src = src;
+            });
+        }
 
         const difficultySettings = {
             easy: { pairs: 8, flipTime: 700 },
@@ -380,9 +454,18 @@
             itemPairs = [...selectedItems, ...selectedItems];
             itemPairs.sort(() => Math.random() - 0.5);
 
-            const columns = currentDifficulty === 'easy' ? 4 : currentDifficulty === 'medium' ? 5 : 6;
-            gameBoard.style.gridTemplateColumns = `repeat(${columns}, 100px)`;
+            // Responsive grid columns based on screen size and difficulty
+            const columns = window.innerWidth < 480 ? 
+                (currentDifficulty === 'easy' ? 3 : currentDifficulty === 'medium' ? 4 : 4) :
+                (currentDifficulty === 'easy' ? 4 : currentDifficulty === 'medium' ? 5 : 6);
+                
+            gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
         }
+
+        // Add resize event listener to handle orientation changes
+        window.addEventListener('resize', () => {
+            initializeGame();
+        });
 
         difficultyButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -453,7 +536,6 @@
                     const totalTime = Math.floor((Date.now() - startTime) / 1000);
                     clearInterval(timerInterval);
 
-                    // Update best time and high score based on difficulty
                     if (currentDifficulty === 'easy') {
                         if (!bestTimeEasy || totalTime < bestTimeEasy) {
                             bestTimeEasy = totalTime;
@@ -544,8 +626,11 @@
             });
         }
 
-        initializeGame();
-        resetGame();
+        // Start game only after images are preloaded
+        preloadImages(() => {
+            initializeGame();
+            resetGame();
+        });
     </script>
 </body>
 </html>
