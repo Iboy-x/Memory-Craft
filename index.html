@@ -49,6 +49,63 @@
             color: var(--text-color);
         }
 
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-text {
+            color: #43eb1d;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #43eb1d;
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 20px;
+            background: rgba(67, 235, 29, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background: #43eb1d;
+            transition: width 0.3s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
         a {
             color: #43eb1d;
             text-decoration: none;
@@ -265,6 +322,15 @@
     </style>
 </head>
 <body data-theme="dark">
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-text">Loading Memory Craft...</div>
+        <div class="loading-spinner"></div>
+        <div class="loading-progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+    </div>
+
     <!-- Rest of the HTML remains the same -->
     <h1>Memory Craft</h1>
     <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
@@ -331,13 +397,26 @@
         function preloadImages(callback) {
             let loadedImages = 0;
             const totalImages = minecraftItems.length;
+            const progressBar = document.getElementById('progress-bar');
             
             minecraftItems.forEach(src => {
                 const img = new Image();
                 img.onload = () => {
                     loadedImages++;
+                    // Update progress bar
+                    const progress = (loadedImages / totalImages) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
                     if(loadedImages === totalImages) {
-                        callback();
+                        // Hide loading overlay with a fade effect
+                        setTimeout(() => {
+                            document.getElementById('loading-overlay').style.opacity = '0';
+                            document.getElementById('loading-overlay').style.transition = 'opacity 0.5s ease';
+                            setTimeout(() => {
+                                document.getElementById('loading-overlay').style.display = 'none';
+                            }, 500);
+                            callback();
+                        }, 500); // Add a small delay to show 100% progress
                     }
                 };
                 img.src = src;
