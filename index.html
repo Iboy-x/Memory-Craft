@@ -14,6 +14,7 @@
             --card-flipped-color: #6faf5f;
             --card-flipped-text-color: #111;
             --matched-glow: 0 0 15px #3aff3a;
+            --button-hover: #5cdb95;
         }
 
         [data-theme="dark"] {
@@ -23,12 +24,14 @@
             --card-flipped-color: #5cdb95;
             --card-flipped-text-color: #000;
             --matched-glow: 0 0 15px #43eb1d;
+            --button-hover: #43eb1d;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: all 0.3s ease;
         }
 
         body {
@@ -69,6 +72,7 @@
             font-size: 2rem;
             margin-bottom: 20px;
             animation: pulse 1.5s infinite;
+            text-shadow: 0 0 10px #43eb1d;
         }
 
         .loading-spinner {
@@ -78,6 +82,7 @@
             border-top: 5px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
+            box-shadow: 0 0 15px #43eb1d;
         }
 
         .loading-progress {
@@ -87,12 +92,13 @@
             border-radius: 10px;
             margin-top: 20px;
             overflow: hidden;
+            box-shadow: 0 0 10px rgba(67, 235, 29, 0.5);
         }
 
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: #43eb1d;
+            background: linear-gradient(90deg, #43eb1d, #6faf5f);
             transition: width 0.3s ease;
         }
 
@@ -102,13 +108,33 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
         }
 
         a {
             color: #43eb1d;
             text-decoration: none;
+            position: relative;
+        }
+
+        a:hover {
+            text-shadow: 0 0 10px #43eb1d;
+        }
+
+        a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #43eb1d;
+            transition: width 0.3s ease;
+        }
+
+        a:hover::after {
+            width: 100%;
         }
 
         h1 {
@@ -116,6 +142,13 @@
             font-size: clamp(2rem, 5vw, 3rem);
             text-align: center;
             margin: 10px 0;
+            text-shadow: 0 0 15px #43eb1d;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 15px #43eb1d; }
+            50% { text-shadow: 0 0 25px #43eb1d; }
         }
 
         .score-board {
@@ -125,11 +158,13 @@
             gap: 15px;
             font-size: clamp(0.9rem, 2.5vw, 1.2rem);
             margin: 10px 0;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
             border-radius: 10px;
             width: 90%;
             max-width: 600px;
+            box-shadow: 0 0 20px rgba(67, 235, 29, 0.2);
+            backdrop-filter: blur(5px);
         }
 
         .theme-toggle {
@@ -144,6 +179,13 @@
             position: fixed;
             top: 10px;
             right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--button-hover);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(67, 235, 29, 0.3);
         }
 
         .difficulty-controls {
@@ -319,9 +361,49 @@
                 grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             }
         }
+
+        .logout-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #3d3d3d;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Pixelify Sans', sans-serif;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4444;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
+        }
+
+        .logout-btn::before {
+            content: '↩';
+            font-size: 1.2em;
+        }
+
     </style>
 </head>
 <body data-theme="dark">
+    <!-- Add this after body tag -->
+    <script>
+        // Check if user is logged in
+        const currentUser = localStorage.getItem('currentUser');
+        if (!currentUser) {
+            window.location.href = 'auth.html';
+        }
+    </script>
+
     <!-- Loading overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-text">Loading Memory Craft...</div>
@@ -334,6 +416,7 @@
     <!-- Rest of the HTML remains the same -->
     <h1>Memory Craft</h1>
     <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
+    <button class="logout-btn" id="logout-btn">Logout</button>
     <div class="difficulty-controls">
         <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
         <button class="difficulty-btn" data-difficulty="medium">Medium</button>
@@ -709,6 +792,12 @@
         preloadImages(() => {
             initializeGame();
             resetGame();
+        });
+
+        // Add logout functionality
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'auth.html';
         });
     </script>
 </body>
