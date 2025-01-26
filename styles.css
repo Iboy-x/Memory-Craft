@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap');
+
+:root {
+    --bg-color: #1e1e1e;
+    --text-color: #cfcfcf;
+    --card-color: #497c43;
+    --card-flipped-color: #6faf5f;
+    --card-flipped-text-color: #111;
+    --matched-glow: 0 0 15px #3aff3a;
+}
+
+[data-theme="dark"] {
+    --bg-color: #2b2d2f;
+    --text-color: #d4d4d4;
+    --card-color: #3c6e47;
+    --card-flipped-color: #5cdb95;
+    --card-flipped-text-color: #000;
+    --matched-glow: 0 0 15px #43eb1d;
+}
+
+body {
+    background-image: url('images/minecraft_bg.jpg');
+    background-size: cover;
+    overflow: hidden;
+    font-family: 'Pixelify Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+h1 {
+    color: #43eb1d;
+    font-size: 3rem;
+}
+
+.score-board {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.theme-toggle {
+    margin-bottom: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: var(--card-color);
+    color: var(--card-flipped-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 100px);
+    grid-gap: 10px;
+}
+
+.card {
+    width: 100px;
+    height: 100px;
+    background-color: var(--card-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.flipped {
+    background-color: var(--card-flipped-color);
+    color: var(--card-flipped-text-color);
+    cursor: default;
+    transform: rotateY(180deg);
+}
+
+.card.matched {
+    box-shadow: var(--matched-glow);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: var(--matched-glow);
+    }
+    50% {
+        box-shadow: 0 0 20px #ffffff;
+    }
+}
+
+.footer {
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+.audio-controls {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.audio-controls button {
+    background-color: var(--card-color);
+    color: var(--card-flipped-color);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Craft - Login</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap');
+
+        :root {
+            --bg-color: #1e1e1e;
+            --text-color: #cfcfcf;
+            --card-color: #2c5530;
+            --accent-color: #43b81d;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --shadow: rgba(67, 184, 29, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('images/minecraft_bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            font-family: 'Pixelify Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .auth-container {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .auth-title {
+            color: var(--accent-color);
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 5px rgba(67, 184, 29, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #43eb1d;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(67, 184, 29, 0.3);
+            background: var(--input-bg);
+            border-radius: 6px;
+            color: #fff;
+            font-family: 'Pixelify Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(67, 184, 29, 0.2);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            font-family: 'Pixelify Sans', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .auth-btn:hover {
+            background: #4ec823;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(67, 184, 29, 0.2);
+        }
+
+        .switch-form {
+            text-align: center;
+            margin-top: 1rem;
+            color: #fff;
+        }
+
+        .switch-form a {
+            color: #43eb1d;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .switch-form a:hover {
+            text-shadow: 0 0 10px #43eb1d;
+        }
+
+        .error-message {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <h1 class="auth-title">Memory Craft</h1>
+        
+        <!-- Login Form -->
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" required>
+            </div>
+            <button type="submit" class="auth-btn">Login</button>
+            <div class="error-message" id="loginError"></div>
+        </form>
+
+        <div class="switch-form">
+            Don't have an account? <a id="showRegister">Register</a>
+        </div>
+
+        <!-- Register Form (Hidden by default) -->
+        <form id="registerForm" style="display: none;">
+            <div class="form-group">
+                <label for="registerUsername">Username</label>
+                <input type="text" id="registerUsername" required>
+            </div>
+            <div class="form-group">
+                <label for="registerPassword">Password</label>
+                <input type="password" id="registerPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            <button type="submit" class="auth-btn">Register</button>
+            <div class="error-message" id="registerError"></div>
+        </form>
+
+        <div class="switch-form" id="loginLink" style="display: none;">
+            Already have an account? <a id="showLogin">Login</a>
+        </div>
+    </div>
+
+    <script>
+        // Form switching logic
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const loginLink = document.getElementById('loginLink');
+
+        showRegister.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            showRegister.parentElement.style.display = 'none';
+            loginLink.style.display = 'block';
+        });
+
+        showLogin.addEventListener('click', () => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            loginLink.style.display = 'none';
+            showRegister.parentElement.style.display = 'block';
+        });
+
+        // Form submission handling
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', data.username);
+                window.location.href = 'cursor.html';
+            } catch (error) {
+                document.getElementById('loginError').style.display = 'block';
+                document.getElementById('loginError').textContent = error.message;
+            }
+        });
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                document.getElementById('registerError').style.display = 'block';
+                document.getElementById('registerError').textContent = 'Passwords do not match';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error);
+                }
+
+                // Automatically log in after registration
+                const loginResponse = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const loginData = await loginResponse.json();
+                localStorage.setItem('token', loginData.token);
+                localStorage.setItem('currentUser', loginData.username);
+                
+                window.location.href = 'cursor.html';
+            } catch (error) {
+                document.getElementById('registerError').style.display = 'block';
+                document.getElementById('registerError').textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html> 

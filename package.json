@@ -1,0 +1,17 @@
+{
+  "name": "memory-craft",
+  "version": "1.0.0",
+  "description": "Memory Craft Game",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.5.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "vercel": "^32.5.0"
+  }
+} 
