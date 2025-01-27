@@ -14,7 +14,6 @@
             --card-flipped-color: #6faf5f;
             --card-flipped-text-color: #111;
             --matched-glow: 0 0 15px #3aff3a;
-            --button-hover: #5cdb95;
         }
 
         [data-theme="dark"] {
@@ -24,14 +23,12 @@
             --card-flipped-color: #5cdb95;
             --card-flipped-text-color: #000;
             --matched-glow: 0 0 15px #43eb1d;
-            --button-hover: #43eb1d;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            transition: all 0.3s ease;
         }
 
         body {
@@ -72,7 +69,6 @@
             font-size: 2rem;
             margin-bottom: 20px;
             animation: pulse 1.5s infinite;
-            text-shadow: 0 0 10px #43eb1d;
         }
 
         .loading-spinner {
@@ -82,7 +78,6 @@
             border-top: 5px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            box-shadow: 0 0 15px #43eb1d;
         }
 
         .loading-progress {
@@ -92,13 +87,12 @@
             border-radius: 10px;
             margin-top: 20px;
             overflow: hidden;
-            box-shadow: 0 0 10px rgba(67, 235, 29, 0.5);
         }
 
         .progress-bar {
             width: 0%;
             height: 100%;
-            background: linear-gradient(90deg, #43eb1d, #6faf5f);
+            background: #43eb1d;
             transition: width 0.3s ease;
         }
 
@@ -108,33 +102,13 @@
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.95); }
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         a {
             color: #43eb1d;
             text-decoration: none;
-            position: relative;
-        }
-
-        a:hover {
-            text-shadow: 0 0 10px #43eb1d;
-        }
-
-        a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -2px;
-            left: 0;
-            background-color: #43eb1d;
-            transition: width 0.3s ease;
-        }
-
-        a:hover::after {
-            width: 100%;
         }
 
         h1 {
@@ -142,13 +116,6 @@
             font-size: clamp(2rem, 5vw, 3rem);
             text-align: center;
             margin: 10px 0;
-            text-shadow: 0 0 15px #43eb1d;
-            animation: glow 2s infinite;
-        }
-
-        @keyframes glow {
-            0%, 100% { text-shadow: 0 0 15px #43eb1d; }
-            50% { text-shadow: 0 0 25px #43eb1d; }
         }
 
         .score-board {
@@ -158,13 +125,11 @@
             gap: 15px;
             font-size: clamp(0.9rem, 2.5vw, 1.2rem);
             margin: 10px 0;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
             border-radius: 10px;
             width: 90%;
             max-width: 600px;
-            box-shadow: 0 0 20px rgba(67, 235, 29, 0.2);
-            backdrop-filter: blur(5px);
         }
 
         .theme-toggle {
@@ -179,13 +144,6 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            background-color: var(--button-hover);
-            transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(67, 235, 29, 0.3);
         }
 
         .difficulty-controls {
@@ -362,48 +320,32 @@
             }
         }
 
-        .logout-btn {
+        @keyframes scorePopup {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.5);
+                opacity: 0.7;
+            }
+            100% { 
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        .score-popup {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: #3d3d3d;
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Pixelify Sans', sans-serif;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            z-index: 100;
+            color: #43eb1d;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: scorePopup 1s ease-out forwards;
+            z-index: 1000;
         }
-
-        .logout-btn:hover {
-            background-color: #ff4444;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
-        }
-
-        .logout-btn::before {
-            content: '↩';
-            font-size: 1.2em;
-        }
-
     </style>
 </head>
 <body data-theme="dark">
-    <!-- Add this after body tag -->
-    <script>
-        // Check if user is logged in
-        const currentUser = localStorage.getItem('currentUser');
-        if (!currentUser) {
-            window.location.href = 'auth.html';
-        }
-    </script>
-
     <!-- Loading overlay -->
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-text">Loading Memory Craft...</div>
@@ -416,7 +358,6 @@
     <!-- Rest of the HTML remains the same -->
     <h1>Memory Craft</h1>
     <button class="theme-toggle" id="theme-toggle">Toggle Theme</button>
-    <button class="logout-btn" id="logout-btn">Logout</button>
     <div class="difficulty-controls">
         <button class="difficulty-btn active" data-difficulty="easy">Easy</button>
         <button class="difficulty-btn" data-difficulty="medium">Medium</button>
@@ -459,6 +400,15 @@
         Your browser does not support the audio element.
     </audio>
 
+    <audio id="flip-sound" preload="auto">
+        <source src="images/cards.wav" type="audio/mpeg">
+    </audio>
+    <audio id="match-sound" preload="auto">
+        <source src="images/match.wav" type="audio/mpeg">
+    </audio>
+    <audio id="wrong-sound" preload="auto">
+        <source src="images/wrong.wav" type="audio/mpeg">
+    </audio>
     <script>
         // Preload images
         const minecraftItems = [
@@ -788,17 +738,105 @@
             });
         }
 
+        const flipSound = document.getElementById('flip-sound');
+        const matchSound = document.getElementById('match-sound');
+        const wrongSound = document.getElementById('wrong-sound');
+
+        // Add function to create score popup animation
+        function createScorePopup(x, y, points) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = `+${points}`;
+            popup.style.left = `${x}px`;
+            popup.style.top = `${y}px`;
+            document.body.appendChild(popup);
+
+            // Remove the element after animation
+            popup.addEventListener('animationend', () => {
+                document.body.removeChild(popup);
+            });
+        }
+
+        function handleCardClick(card) {
+            if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+
+            // Play flip sound
+            flipSound.currentTime = 0;
+            flipSound.play().catch(e => console.log('Audio play failed:', e));
+
+            if (!startTime) {
+                startTime = Date.now();
+                startTimer();
+            }
+
+            card.style.backgroundImage = `url(${card.dataset.item})`;
+            card.style.backgroundSize = 'cover';
+            card.textContent = '';
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                moveCounterElement.textContent = moves;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const oldScore = score;
+
+            if (card1.dataset.item === card2.dataset.item) {
+                // Play match sound
+                matchSound.currentTime = 0;
+                matchSound.play().catch(e => console.log('Audio play failed:', e));
+
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+
+                matchedCount += 2;
+                score = calculateScore(matchedCount / 2, moves, Math.floor((Date.now() - startTime) / 1000));
+                
+                // Calculate score difference and create popup
+                const scoreDiff = score - oldScore;
+                const rect = card1.getBoundingClientRect();
+                createScorePopup(rect.left + rect.width / 2, rect.top, scoreDiff);
+
+                scoreElement.textContent = score;
+
+                // Rest of the match checking logic remains the same
+                if (matchedCount === itemPairs.length) {
+                    const totalTime = Math.floor((Date.now() - startTime) / 1000);
+                    clearInterval(timerInterval);
+
+                    // Previous win condition code remains the same
+
+                    showGameOverModal(score, totalTime);
+                }
+
+                flippedCards = [];
+            } else {
+                wrongSound.currentTime = 0;
+                wrongSound.play().catch(e => console.log('Audio play failed:', e));
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.style.backgroundImage = '';
+                    card1.textContent = '?';
+                    card2.style.backgroundImage = '';
+                    card2.textContent = '?';
+                    flippedCards = [];
+                }, flipTime);
+            }
+        }
+
         // Start game only after images are preloaded
         preloadImages(() => {
             initializeGame();
             resetGame();
         });
 
-        // Add logout functionality
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            window.location.href = 'auth.html';
-        });
+
     </script>
 </body>
 </html>
